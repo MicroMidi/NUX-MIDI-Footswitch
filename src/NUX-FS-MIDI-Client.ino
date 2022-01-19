@@ -1,60 +1,46 @@
 /**
    --------------------------------------------------------
-   This example shows how to use client MidiBLE
-   Client BLEMIDI works im a similar way Server (Common) BLEMIDI, but with some exception.
-
-   The most importart exception is read() method. This function works as usual, but
-   now it manages machine-states BLE connection too. The
-   read() function must be called several times continuously in order to scan BLE device
-   and connect with the server. In this example, read() is called in a "multitask function of
-   FreeRTOS", but it can be called in loop() function as usual.
-
-   Some BLEMIDI_CREATE_INSTANCE() are added in MidiBLE-Client to be able to choose a specific server to connect
-   or to connect to the first server which has the MIDI characteristic. You can choose the server by typing in the name field
-   the name of the server or the BLE address of the server. If you want to connect
-   to the first MIDI server BLE found by the device, you just have to set the name field empty ("").
-
-   FOR ADVANCED USERS: Other advanced BLE configurations can be changed in hardware/BLEMIDI_Client_ESP32.h
-   #defines in the head of the file (IMPORTANT: Only the first user defines must be modified). These configurations
-   are related to security (password, pairing and securityCallback()), communication params, the device name
-   and other stuffs. Modify defines at your own risk.
-
-
-
-   @auth RobertoHE
+   This client code is based on the example file of author @RobertoHE incorporated in the BLE-MIDI library.
+   I adjusted it for the "Nux Mighty Plug" device to increment/decrement the effect number with a up/down
+   button. The current effect is shown in a 7 segment LED display.
+   
+   (auth: @MicroMidi)
    --------------------------------------------------------
 */
 
 #include <Arduino.h>
-#include <avdweb_Switch.h>
-#include <BLEMIDI_Transport.h>
 
+#include <BLEMIDI_Transport.h>
 #include <hardware/BLEMIDI_Client_ESP32.h>
 
+#include <avdweb_Switch.h>
 #include <AdvancedSevenSegment.h>
-
-
 
 //#include <hardware/BLEMIDI_ESP32_NimBLE.h>
 //#include <hardware/BLEMIDI_ESP32.h>
 //#include <hardware/BLEMIDI_nRF52.h>
 //#include <hardware/BLEMIDI_ArduinoBLE.h>
 
-BLEMIDI_CREATE_DEFAULT_INSTANCE(); //Connect to first server found
-
+// Connect to the NUX BLE-MIDI service
+BLEMIDI_CREATE_INSTANCE("NUX MIGHTY PLUG MIDI", MIDI)       //Connect to a specific name server
+//BLEMIDI_CREATE_DEFAULT_INSTANCE(); //Connect to first server found
 //BLEMIDI_CREATE_INSTANCE("",MIDI)                  //Connect to the first server found
 //BLEMIDI_CREATE_INSTANCE("f2:c1:d9:36:e7:6b",MIDI) //Connect to a specific BLE address server
-//BLEMIDI_CREATE_INSTANCE("MyBLEserver",MIDI)       //Connect to a specific name server
+
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 2 //modify for match with yout board
 #endif
 
+// PIN fot toogle on/off LED
 #define PIN_LED    4
+
+// PINs for both switches
 #define PIN_BUTTON_UP 13
 #define PIN_BUTTON_DOWN 12
 #define MAX_EFFECT_COUNT 7
 
+// PINS for the 7-segment LED display
 #define SEG_G 21
 #define SEG_F 19
 #define SEG_A 18
@@ -82,11 +68,10 @@ static NimBLEAdvertisedDevice* advDevice;
 
 /**
    -----------------------------------------------------------------------------
-   When BLE is connected, LED will turn on (indicating that connection was successful)
-   When receiving a NoteOn, LED will go out, on NoteOff, light comes back on.
-   This is an easy and conveniant way to show that the connection is alive and working.
+ When BLE is connected, the internal LED will turn on (indicating that connection was successful)
    -----------------------------------------------------------------------------
 */
+
 void setup()
 {
   pinMode(PIN_LED, OUTPUT);
@@ -142,9 +127,6 @@ void setup()
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-
-  //BL: Wait for connection to be established
-  //delay(2000);
 }
 
 // -----------------------------------------------------------------------------
@@ -159,8 +141,10 @@ void loop()
     if (FirstRun == true && (millis() - t0) > 200) {
       FirstRun = false;
 
-      t0 = millis();
-
+      Serial.print("millis(): ");
+      Serial.println(millis());
+      Serial.print("t0: ");
+      Serial.println(t0);
       Serial.println("First run");
 
       vTaskDelay(250 / portTICK_PERIOD_MS);
@@ -188,7 +172,6 @@ void loop()
         LEDState = HIGH;
       else
         LEDState = LOW;
-
 
       digitalWrite(PIN_LED, LEDState);
 
