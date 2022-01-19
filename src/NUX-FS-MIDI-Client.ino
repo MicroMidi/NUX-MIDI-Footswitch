@@ -33,6 +33,8 @@
 
 #include <AdvancedSevenSegment.h>
 
+
+
 //#include <hardware/BLEMIDI_ESP32_NimBLE.h>
 //#include <hardware/BLEMIDI_ESP32.h>
 //#include <hardware/BLEMIDI_nRF52.h>
@@ -48,15 +50,11 @@ BLEMIDI_CREATE_DEFAULT_INSTANCE(); //Connect to first server found
 #define LED_BUILTIN 2 //modify for match with yout board
 #endif
 
-// PIN fot toogle on/off LED
 #define PIN_LED    4
-// PINs for both switches
 #define PIN_BUTTON_UP 13
 #define PIN_BUTTON_DOWN 12
-// Max. 7 effects for the NUX Mighy Plug / Air
 #define MAX_EFFECT_COUNT 7
 
-// PINS for the 7-segment LED disply
 #define SEG_G 21
 #define SEG_F 19
 #define SEG_A 18
@@ -84,7 +82,9 @@ static NimBLEAdvertisedDevice* advDevice;
 
 /**
    -----------------------------------------------------------------------------
-   When BLE is connected, the internal LED will turn on (indicating that connection was successful)
+   When BLE is connected, LED will turn on (indicating that connection was successful)
+   When receiving a NoteOn, LED will go out, on NoteOff, light comes back on.
+   This is an easy and conveniant way to show that the connection is alive and working.
    -----------------------------------------------------------------------------
 */
 void setup()
@@ -101,6 +101,7 @@ void setup()
     isConnected = true;
     digitalWrite(LED_BUILTIN, HIGH);
     // Serial.println(advDevice->toString().c_str());
+    t0 = millis();
   });
 
   BLEMIDI.setHandleDisconnected([]()
@@ -122,6 +123,12 @@ void setup()
     CurrentEffect = ControlValue;
     sevenSegment.setNumber(CurrentEffect + 1);
 
+    if (LEDState == LOW)
+      LEDState = HIGH;
+    else
+      LEDState = LOW;
+
+    digitalWrite(PIN_LED, LEDState);
   });
 
 
@@ -147,14 +154,16 @@ void loop()
 {
   //MIDI.read();  // This function is called in the other task
 
-  if (isConnected && (millis() - t0) > 1000)
-  {
-    t0 = millis();
-    
-    if (FirstRun == true) {
-      Serial.println("First run");
+  if (isConnected) {
+
+    if (FirstRun == true && (millis() - t0) > 200) {
       FirstRun = false;
 
+      t0 = millis();
+
+      Serial.println("First run");
+
+      vTaskDelay(250 / portTICK_PERIOD_MS);
       MIDI.sendControlChange(49, 0, 1);
       sevenSegment.setNumber(1);
     }
