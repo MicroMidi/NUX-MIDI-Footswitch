@@ -1,8 +1,8 @@
 /**
    --------------------------------------------------------
    This client code is based on the example file of author @RobertoHE incorporated in the BLE-MIDI library.
-   I adjusted it for the "Nux Mighty Plug" device to increment/decrement the effect number with a up/down
-   button. The current effect is shown in a 7 segment LED display.
+   I adjusted it for the "Nux Mighty Plug" device and the Heltec "ESP32 Wi-Fi Kit" board to increment/decrement the effect number with a up/down
+   button. With the two additional buttons the first or last effect bank of the NUX device can be selected. The current effect, charge level and connection status is shown on the integrated OLED display.
 
    (auth: @MicroMidi)
    --------------------------------------------------------
