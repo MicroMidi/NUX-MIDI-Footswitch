@@ -19,4 +19,11 @@ To build the seven segment footswitch hardware on your own you really do not nee
 
 Even less components are needed for implementing the OLED version: The Heltec-Wi-Fi-Kit board, four push buttons, a micro USB cable and a case - that's all. This solution can be enhanced by rechargeable LiPo-battery which will be charged via a connected USB cable. A JST-1.25 battery connector and the hardware for charge management are included in the Heltec board.
 
+This is what the front view looks like (credits go to Mark Duffill for providing me with such a beautiful and functional enclosure):
+<img src="https://github.com/MicroMidi/NUX-MIDI-Footswitch/blob/main/images/NUX-Footswitch-Front.jpg">
+
+The back view is shown in the following image:
+<img src="https://github.com/MicroMidi/NUX-MIDI-Footswitch/blob/main/images/NUX-Footswitch-Back.jpg">
+
+
 If I find the time I will design a tiny PCB that hosts the ESP32 and the external components for the seven segment variant. The OLED version just needs the four push buttons connected to the board. Stay tuned for further instructions...
