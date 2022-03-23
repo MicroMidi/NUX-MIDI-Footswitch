@@ -1,10 +1,13 @@
 /**
    --------------------------------------------------------
    This client code is based on the example file of author @RobertoHE incorporated in the BLE-MIDI library.
-   I adjusted it for the "Nux Mighty Plug" device and the Heltec "ESP32 Wi-Fi Kit" board to increment/decrement the effect number with a up/down
-   button. With the two additional buttons the first or last effect bank of the NUX device can be selected. The current effect, charge level and connection status is shown on the integrated OLED display.
+   I adjusted it for the "Nux Mighty Plug" device and the Heltec ESP 32 WiFi Kit. This version supports four buttons:
+   - two main push-buttons (2, 3) to decrement/increment the effect number
+   - two addititional push-buttons (1, 4) to set the effect to the lowest/highest value.
+   
+   The connection status, battery level and the current effect is shown on the integrated OLED display.
 
-   (auth: @MicroMidi)
+   (authors: @RobertoHE/@MicroMidi)
    --------------------------------------------------------
 */
 
@@ -48,22 +51,24 @@ BLEMIDI_CREATE_INSTANCE("NUX MIGHTY PLUG MIDI", MIDI)       //Connect to a speci
 
 #define MAX_EFFECT_COUNT 7
 
-Switch pushButton1 = Switch(PIN_BUTTON_1);
-Switch pushButton2 = Switch(PIN_BUTTON_2);
-Switch pushButton3 = Switch(PIN_BUTTON_3);
-Switch pushButton4 = Switch(PIN_BUTTON_4);
-
+Switch pushButton1 = Switch(PIN_BUTTON_1); // set effect number to lowest value
+Switch pushButton2 = Switch(PIN_BUTTON_2); // decrement effect
+Switch pushButton3 = Switch(PIN_BUTTON_3); // increment effect
+Switch pushButton4 = Switch(PIN_BUTTON_4); // set effect number to highest value
 
 void ReadCB(void *parameter);       //Continuos Read function (See FreeRTOS multitasks)
 
 unsigned long t0 = millis();
 unsigned long tBatt = millis();
+unsigned long tSearchDevice = millis();
+int ScanCount = 0;
 
 bool isConnected = false;
 
 byte CurrentEffect = 0;
 int LEDState = LOW;
 bool FirstRun = true;
+bool FirstRunDisconnect = true;
 
 // BT-symbol
 const unsigned char BT_bits[] PROGMEM = {
@@ -112,26 +117,27 @@ void setup()
   Heltec.display->setFont(ArialMT_Plain_10);
   Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
   Heltec.display->clear();
-  Heltec.display->drawString(10, 20, "Scanning for device ...");
+  Heltec.display->drawString(10, 20, "Initialize device ...");
   Heltec.display->display();
 
   // Initialize power management
   tBatt = millis();
   InitPowerManagement();
 
-
   BLEMIDI.setHandleConnected([]()
   {
     Serial.println("---------CONNECTED---------");
-    // Heltec.display->drawString(0,0, "---------CONNECTED---------");
-    Heltec.begin(true /*DisplayEnable Enable*/, false /*LoRa Disable*/, true /*Serial Enable*/);
-    Heltec.display->clear();
+    // Heltec.begin(true /*DisplayEnable Enable*/, false /*LoRa Disable*/, true /*Serial Enable*/);
+    //    Heltec.display->init();
+    //    Heltec.display->flipScreenVertically();
+    //    Heltec.display->clear();
+    //    Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
+    //    Heltec.display->setFont(ArialMT_Plain_16);
+    //    Heltec.display->drawString(10, 20, "NUX connected");
     Heltec.display->drawXbm(0, 0, BT_width, BT_height, BT_bits);
-    Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
-    Heltec.display->setFont(ArialMT_Plain_16);
-    Heltec.display->drawString(10, 20, "NUX connected");
     Heltec.display->display();
     isConnected = true;
+    FirstRunDisconnect = true;
     digitalWrite(LED_BUILTIN, HIGH);
     // Serial.println(advDevice->toString().c_str());
     t0 = millis();
@@ -140,16 +146,20 @@ void setup()
   BLEMIDI.setHandleDisconnected([]()
   {
     Serial.println("---------NOT CONNECTED---------");
-    Heltec.begin(true /*DisplayEnable Enable*/, false /*LoRa Disable*/, true /*Serial Enable*/);
-    Heltec.display->clear();
-    Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
-    Heltec.display->setFont(ArialMT_Plain_16);
-    Heltec.display->drawString(50, 10, "NUX");
-    Heltec.display->drawString(25, 25, "disconnected");
-    Heltec.display->display();
+    // Heltec.begin(true /*DisplayEnable Enable*/, false /*LoRa Disable*/, true /*Serial Enable*/);
+    // Heltec.display->init();
+    //    Heltec.display->flipScreenVertically();
+    //    Heltec.display->clear();
+    //    Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
+    //    Heltec.display->setFont(ArialMT_Plain_16);
+    //    Heltec.display->drawString(50, 10, "NUX");
+    //    Heltec.display->drawString(25, 25, "disconnected");
+    //    Heltec.display->display();
     isConnected = false;
     FirstRun = true;
     CurrentEffect = 0;
+    tSearchDevice = millis();
+    ScanCount = 0;
     digitalWrite(LED_BUILTIN, LOW);
   });
 
@@ -199,15 +209,24 @@ void loop()
       vTaskDelay(250 / portTICK_PERIOD_MS);
       MIDI.sendControlChange(49, 0, 1);
 
+      Heltec.display->clear();
+      Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
+      Heltec.display->setFont(ArialMT_Plain_16);
+      Heltec.display->drawString(0, 20, "NUX connected");
+      Heltec.display->display();
+
       delay(1000);
+
+      Heltec.display->clear();
       DisplayEffect(CurrentEffect + 1);
+      Heltec.display->display();
     }
 
     pushButton1.poll();
     if (pushButton1.pushed()) {
 
       CurrentEffect = 0;
-      
+
       MIDI.sendControlChange(49, CurrentEffect, 1);
       DisplayEffect(CurrentEffect + 1);
     }
@@ -240,42 +259,76 @@ void loop()
     if (pushButton4.pushed()) {
 
       CurrentEffect = MAX_EFFECT_COUNT - 1;
-      
+
       MIDI.sendControlChange(49, CurrentEffect, 1);
       DisplayEffect(CurrentEffect + 1);
     }
-
-    //Loop for battery management
-    if ((millis() - tBatt) > 2000) {
-      tBatt = millis();
-      voltage = Sample();
-      if (voltage < MINBATT) {                  // Low Voltage cut off shut down to protect battery as long as possible
-        Heltec.display->setColor(WHITE);
-        Heltec.display->setFont(ArialMT_Plain_10);
-        Heltec.display->setTextAlignment(TEXT_ALIGN_CENTER);
-        Heltec.display->drawString(64, 24, "Shutdown!!");
+  }
+  // Loop for disconnected device
+  else {
+    if ((millis() - tSearchDevice) > 1000) {
+      tSearchDevice = millis();
+      if (FirstRunDisconnect == true) {
+        FirstRunDisconnect = false;
+        Heltec.display->clear();
+        Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
+        Heltec.display->setFont(ArialMT_Plain_16);
+        Heltec.display->drawString(40, 10, "NUX");
+        Heltec.display->drawString(10, 30, "disconnected");
         Heltec.display->display();
-        delay(2000);
-#if defined(__DEBUG) && __DEBUG > 0
-        Serial.printf(" !! Shutting down...low battery volotage: %dmV.\n", voltage);
-        delay(10);
-#endif
-        esp_sleep_enable_timer_wakeup(LO_BATT_SLEEP_TIME);
-        esp_deep_sleep_start();
-      } else if (voltage < LIGHT_SLEEP_VOLTAGE) {     // Use light sleep once on battery
-        uint64_t s = VBATT_SAMPLE;
-#if defined(__DEBUG) && __DEBUG > 0
-        Serial.printf(" - Light Sleep (%dms)...battery volotage: %dmV.\n", (int)s, voltage);
-        delay(20);
-#endif
-        esp_sleep_enable_timer_wakeup(s * 1000);   // Light Sleep does not flush buffer
-        esp_light_sleep_start();
+
+        delay (1000);
       }
-      delay(ADC_READ_STABILIZE);
+
+      if (ScanCount == 0) {
+        Heltec.display->clear();
+        Heltec.display->setTextAlignment(TEXT_ALIGN_LEFT);
+        Heltec.display->setFont(ArialMT_Plain_16);
+        Heltec.display->drawString(0, 20, "Scan for device");
+      }
 
       drawBattery(voltage, voltage < LIGHT_SLEEP_VOLTAGE);
+      Heltec.display->drawProgressBar(0, 40, 120, 10, ScanCount * 10);
       Heltec.display->display();
+
+      if (ScanCount < 10)
+        ScanCount++;
+      else
+        ScanCount = 0;
+
     }
+  }
+
+  //Loop for battery management
+  if ((millis() - tBatt) > 2000) {
+    tBatt = millis();
+    voltage = Sample();
+    if (voltage < MINBATT) {                  // Low Voltage cut off shut down to protect battery as long as possible
+      Heltec.display->setColor(WHITE);
+      Heltec.display->setFont(ArialMT_Plain_10);
+      Heltec.display->setTextAlignment(TEXT_ALIGN_CENTER);
+      Heltec.display->drawString(64, 24, "Shutdown!!");
+      Heltec.display->display();
+      delay(2000);
+#if defined(__DEBUG) && __DEBUG > 0
+      Serial.printf(" !! Shutting down...low battery volotage: %dmV.\n", voltage);
+      delay(10);
+#endif
+      esp_sleep_enable_timer_wakeup(LO_BATT_SLEEP_TIME);
+      esp_deep_sleep_start();
+    } else if (voltage < LIGHT_SLEEP_VOLTAGE) {     // Use light sleep once on battery
+      uint64_t s = VBATT_SAMPLE;
+#if defined(__DEBUG) && __DEBUG > 0
+      Serial.printf(" - Light Sleep (%dms)...battery volotage: %dmV.\n", (int)s, voltage);
+      delay(20);
+#endif
+      esp_sleep_enable_timer_wakeup(s * 1000);   // Light Sleep does not flush buffer
+      esp_light_sleep_start();
+    }
+    delay(ADC_READ_STABILIZE);
+
+    drawBattery(voltage, voltage < LIGHT_SLEEP_VOLTAGE);
+    Heltec.display->display();
   }
 }
 
