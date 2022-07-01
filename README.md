@@ -50,4 +50,6 @@ The following image shows a schematic overview of the wiring from the OLED displ
 Again, the choice of the selected PINs is up to you and depends on the ESP32 module that you are using. The PINs of the push buttons must support a digital input with pull-up functionality, the PIN for the volume pedal should support an analog input and the OLED display must be connected to the PINs with the I2C-interface of your ESP32 module. 
 
 # Plans for the future
-If I find the time I will design a tiny PCB that hosts the ESP32 and the external components for the seven segment variant. The OLED version just needs the four push buttons connected to the board. Stay tuned for further instructions...
+If I find the time I will design a tiny PCB that hosts the ESP32 module and the external components for the seven segment variant. The Heltec OLED version just needs the four push buttons and and optional analog effect pedal connected to the board - so there is no need for an PCB board. The ESP32 variant just needs additional wiring of the OLED display unit.
+
+Stay tuned for further development...
