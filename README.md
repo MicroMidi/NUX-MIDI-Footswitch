@@ -5,7 +5,9 @@ This project is intended to build a simple wireless footswitch for the NUX Might
 
 There are currently three variants of the code:
 - Generic ESP32 module with 7-segment LED-display: This variant is based on a generic ESP32 microcontroller and implements a wireless footswitch with two buttons and a seven segment display for showing the selected effect on the NUX device. In the current version the code supports two buttons: The first button is implemented to increment the effect-number, the second button to decrement the effect-number. A long press on the increment-button sets the effect back to the first effect of the NUX device. A seven segment LED-display shows the current effect that is selected, another optional LED toggles on/off with every button-press event.
+
 - Heltec ESP32 WiFi-Kit with integrated OLED display and integrated management for an attached LiPo battery: This variant is based on the versatile Heltec ESP32 WiFi-Kit  (https://heltec.org/project/wifi-kit-32/) which has already an OLED display attached and supports voltage- and charge-management for an external LiPo-battery that can be easily attached to the Heltec module. This version uses two switches to increment and decrement the effects, the other two buttons set the effect to the lowest and highest effect bank. The OLED display shows the selected effect, the level of the volume pedal (optional), the battery charge level and the connection status. If you want to adjust the master volume of the NUX device with an external analog effect pedal the code now supports reading the analog input of effect pedal and translates it to MIDI commands for the master volume level of the NUX device. This is a (very useful an comfortable) option - but it can be easily deactivated in the code if pure effect switching is needed.
+
 - Generic ESP32 module with external OLED display: This variant is based on a generic ESP32 microcontroller and  implements a wirelesss footswitch with four buttons, an optional analog volume pedal and an external SSD13 OLED display. This version also uses two switches to increment and decrement the effects, the other two buttons set the effect to the lowest and highest effect bank. The OLED display shows the selected effect, the level of the volume pedal (optional) and the connection status. This variant also supports as an option the connection of an external analog pedal to control the master volume level of the NUX device
 
 The code in all variants is able to handle MIDI effect-switching-events sent from the NUX Mighty device to synchronize the selected effect between footswitch and NUX device. This ensures that the indicated effect of the footswitch and the NUX Mighty device are always in sync - even if you switch the selected effects at the NUX device.
@@ -17,6 +19,8 @@ If you want to display the selected effect at the footswitch on a seven-segment 
 
 For the Heltec OLED version you need to install the Heltec board software and the Heltec ESP32 Dev-Board library (https://github.com/HelTecAutomation/Heltec_ESP32). Everything you need to know about this task can be found here: https://heltec-automation-docs.readthedocs.io/en/latest/esp32/quick_start.html
 Please make sure that you use the most recent version of the board software and the corresponding heltec library!
+
+The generic ESP32 variant with an external OLED display leverages the brilliant ThingPulse library for OLED displays (https://github.com/ThingPulse/esp8266-oled-ssd1306) that needs to be incorporated with the Arduino library manager. Please make sure that you have installed the most recent board software for your ESP32 module!
 
 # Hardware requirements
 To build the seven segment footswitch hardware on your own you really do not need many components: Mandatory is an ESP32 microcontroller with two push buttons for effect-switching. Optional is a LED 7-segement display with 8 resistors for each LED-segment. Another optional LED connected with a resistor to the ESP32 indicates a button-press-event by toggling on/off. Power supply can be implemented by an USB-cable or an external battery module.
@@ -43,7 +47,7 @@ The following image shows a schematic overview of the wiring from the OLED displ
 
 <img src="https://github.com/MicroMidi/NUX-MIDI-Footswitch/blob/main/images/Nux-Footswitch-Volume-Wiring-Scheme-ESP32.jpg">
 
-Again, the choice of the selected PINs is up to you and depends on the ESP32 module that you are using. The PINs of the push buttons must support a digital input with pull-up functionaltiy, the PIN for the volume pedal should support an analog input and the OLED display must be connected to the PINs with the I2C-interface of your ESP32 module. 
+Again, the choice of the selected PINs is up to you and depends on the ESP32 module that you are using. The PINs of the push buttons must support a digital input with pull-up functionality, the PIN for the volume pedal should support an analog input and the OLED display must be connected to the PINs with the I2C-interface of your ESP32 module. 
 
 # Plans for the future
 If I find the time I will design a tiny PCB that hosts the ESP32 and the external components for the seven segment variant. The OLED version just needs the four push buttons connected to the board. Stay tuned for further instructions...
