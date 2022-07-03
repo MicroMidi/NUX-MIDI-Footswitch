@@ -35,6 +35,9 @@ This is what the front view of the Heltec ESP32 variant looks like (credits go t
 The back view of the Heltec ESP32 variant is shown in the following image:
 <img src="https://github.com/MicroMidi/NUX-MIDI-Footswitch/blob/main/images/Nux-Footswitch-Volume-Back.jpg">
 
+This is the breadboard prototype for the generic ESP32 variant with external OLED display:
+<img src="https://github.com/MicroMidi/NUX-MIDI-Footswitch/blob/main/images/Nux-Footswitch-GenericESP32.jpg">
+
 # Wiring scheme for Heltec based solution with volume pedal
 The following image shows a schematic overview of the wiring from the four push buttons and the analog volume pedal to the Heltec ESP32 module:
 
