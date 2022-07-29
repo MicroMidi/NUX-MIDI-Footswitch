@@ -89,7 +89,7 @@ bool isConnected = false;
 byte CurrentEffect = 0;
 int LEDState = LOW;
 bool FirstRun = true;
-bool FirstRunDisconnect = true;
+bool FirstRunDisconnect = false;
 
 // BT-symbol
 const unsigned char BT_bits[] PROGMEM = {
