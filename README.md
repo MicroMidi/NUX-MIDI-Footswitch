@@ -1,8 +1,8 @@
 # NUX-MIDI-Footswitch
-# BLE MIDI Footswitch Project for the NUX Mighty Plug / Mighty Air
+# BLE MIDI Footswitch Project for the NUX Mighty Plug / NUX Mighty Plug Pro (beta) / Mighty Air
 [![Github All Releases download count](https://img.shields.io/github/downloads/MicroMidi/NUX-MIDI-Footswitch/total?style=flat-square)](https://github.com/MicroMidi/NUX-MIDI-Footswitch/releases)
 
-This project is intended to build a simple wireless footswitch for the NUX Mighty Plug / Mighty Air based on the ESP32 microcontroller with integrated Bluetooth functionality. The footswitch operates wireless and interacts via Bluetooth Low Energy (BLE) and MIDI commands directly with the NUX device.
+This project is intended to build a simple wireless footswitch for the NUX Mighty Plug / Mighty Plug Pro (beta) / Mighty Air based on the ESP32 microcontroller with integrated Bluetooth functionality. The footswitch operates wireless and interacts via Bluetooth Low Energy (BLE) and MIDI commands directly with the NUX device.
 
 There are currently three variants of the code:
 - Generic ESP32 module with 7-segment LED-display: This variant is based on a generic ESP32 microcontroller and implements a wireless footswitch with two buttons and a seven segment display for showing the selected effect on the NUX device. In the current version the code supports two buttons: The first button is implemented to increment the effect-number, the second button to decrement the effect-number. A long press on the increment-button sets the effect back to the first effect of the NUX device. A seven segment LED-display shows the current effect that is selected, another optional LED toggles on/off with every button-press event.
@@ -28,7 +28,7 @@ To build the seven segment footswitch hardware on your own you really do not nee
 
 Even less components are needed for implementing the Heltec OLED version: The Heltec ESP32 WiFi-Kit module, four push buttons, a micro USB cable and a case - that's all. This solution can be enhanced by rechargeable LiPo-battery which will be charged via a connected USB cable. A JST-1.25 battery connector and the hardware for charge management are included in the Heltec board. For an optional volume pedal you need an 6,3mm stereo jack connector that matches to an analog effect pedal.
 
-For the variant with a generic ESP32 module in combination with an external OLED display you need any kind of an ESP32 microcontroller, an SSD1306 OLED display with I2C-interface, four push buttons, a micro USB cable and a case. This variant needs external power supply via USB-connection as not battery is incorporated in the soltion. via a connected USB cable. For an optional volume pedal you also need the 6,3mm stereo jack connector that matches to an analog effect pedal.
+For the variant with a generic ESP32 module in combination with an external OLED display you need any kind of an ESP32 microcontroller, an SSD1306 OLED display with I2C-interface, four push buttons, a micro USB cable and a case. This variant needs external power supply via USB-connection as no battery support is incorporated in the solution. For an optional volume pedal you also need the 6,3mm stereo jack connector that matches to an analog effect pedal.
 
 This is what the front view of the Heltec ESP32 variant looks like (credits go to Mark Duffill for providing me with such a beautiful and functional enclosure):
 <img src="https://github.com/MicroMidi/NUX-MIDI-Footswitch/blob/main/images/Nux-Footswitch-Volume-Front.jpg">
