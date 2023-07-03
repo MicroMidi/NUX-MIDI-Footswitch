@@ -1,6 +1,5 @@
 # NUX-MIDI-Footswitch
 # BLE MIDI Footswitch Project for the NUX Mighty Plug / NUX Mighty Plug Pro (beta) / Mighty Air
-[![Github All Releases download count](https://img.shields.io/github/downloads/MicroMidi/NUX-MIDI-Footswitch/total?style=flat-square)](https://github.com/MicroMidi/NUX-MIDI-Footswitch/releases)
 
 This project is intended to build a simple wireless footswitch for the NUX Mighty Plug / Mighty Plug Pro (beta) / Mighty Air based on the ESP32 microcontroller with integrated Bluetooth functionality. The footswitch operates wireless and interacts via Bluetooth Low Energy (BLE) and MIDI commands directly with the NUX device.
 
